@@ -3,11 +3,13 @@ from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration
 import streamlit as st
 
-
-
+# Load pre-trained BLIP model and processor
 model_name = 'Salesforce/blip-vqa-base'
 model = BlipForConditionalGeneration.from_pretrained(model_name)
 processor = BlipProcessor.from_pretrained(model_name)
+
+# Set the model to evaluation mode
+model.eval()
 
 def preprocess_image(image: Image.Image):
     """Preprocess the image for BLIP."""
@@ -30,13 +32,15 @@ def get_vqa_answer(image, question):
     }
     
     with torch.no_grad():
-        outputs = model(**inputs)
-        answer = processor.decode(outputs.logits.argmax(-1))
+        outputs = model(input_ids=inputs['input_ids'], pixel_values=inputs['pixel_values'])
+        # Get the predicted answer
+        answer_ids = torch.argmax(outputs.logits, dim=-1)
+        answer = processor.tokenizer.decode(answer_ids[0], skip_special_tokens=True)
     
     return answer
 
 def main():
-    st.title('Visual Question Answering (VQA) with VisualBERT Model')
+    st.title('Visual Question Answering (VQA) with BLIP Model')
     
     # Upload image
     uploaded_image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
