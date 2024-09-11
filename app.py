@@ -3,7 +3,7 @@ from PIL import Image
 from transformers import VisualBertForQuestionAnswering, VisualBertTokenizer
 import streamlit as st
 
-# Load pre-trained VQA model and processor
+# Load pre-trained VQA model and tokenizer
 model_name = 'uclanlp/visualbert-vqa-coco'
 model = VisualBertForQuestionAnswering.from_pretrained(model_name)
 tokenizer = VisualBertTokenizer.from_pretrained(model_name)
@@ -39,7 +39,7 @@ def get_vqa_answer(image, question):
     return answer
 
 def main():
-    st.title('Visual Question Answering (VQA) with VILT Model')
+    st.title('Visual Question Answering (VQA) with VisualBERT Model')
     
     # Upload image
     uploaded_image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
