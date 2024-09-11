@@ -1,6 +1,5 @@
 from transformers import ViltProcessor
 from PIL import Image
-import torch
 
 # Initialize processor globally
 processor = ViltProcessor.from_pretrained('dandelin/vilt-b32-finetuned-vqa')
@@ -11,4 +10,4 @@ def preprocess_image(image: Image.Image):
 
 def preprocess_question(question: str):
     # Tokenize and preprocess the question
-    return processor(text=question, return_tensors="pt")
+    return processor(text=question, return_tensors="pt").input_ids
