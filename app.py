@@ -3,10 +3,7 @@ from PIL import Image
 from transformers import BlipProcessor, BlipForConditionalGeneration
 import streamlit as st
 
-# Load pre-trained VQA model and tokenizer
-model_name = 'uclanlp/visualbert-vqa-coco'
-model = VisualBertForQuestionAnswering.from_pretrained(model_name)
-tokenizer = VisualBertTokenizer.from_pretrained(model_name)
+
 
 model_name = 'Salesforce/blip-vqa-base'
 model = BlipForConditionalGeneration.from_pretrained(model_name)
