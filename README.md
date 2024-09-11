@@ -1,6 +1,5 @@
-Sure! Here's a sample `README.md` file for your VQA project. This file provides an overview of the project, setup instructions, and usage details.
 
----
+
 
 # Visual Question Answering (VQA) System
 
