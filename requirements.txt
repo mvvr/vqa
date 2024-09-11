@@ -1,6 +1,6 @@
-torch==2.0.0
-torchvision==0.15.1
-transformers==4.23.1
-streamlit==1.12.1
-Pillow==9.3.0
-altair<5
+torch
+torchvision
+transformers
+streamlit
+Pillow
+altair
