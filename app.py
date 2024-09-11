@@ -1,50 +1,41 @@
 import torch
 from PIL import Image
-from transformers import ViltForQuestionAnswering, ViltProcessor
+from transformers import VisualBertForQuestionAnswering, VisualBertTokenizer
 import streamlit as st
 
 # Load pre-trained VQA model and processor
-model_name = 'dandelin/vilt-b32-finetuned-vqa'
-model = ViltForQuestionAnswering.from_pretrained(model_name)
-processor = ViltProcessor.from_pretrained(model_name)
+model_name = 'uclanlp/visualbert-vqa-coco'
+model = VisualBertForQuestionAnswering.from_pretrained(model_name)
+tokenizer = VisualBertTokenizer.from_pretrained(model_name)
 
 # Set the model to evaluation mode
 model.eval()
 
 def preprocess_image(image: Image.Image):
-    """Preprocess the image for the model."""
-    # Convert image to RGB and prepare for the model
+    """Convert image to tensor."""
     image = image.convert("RGB")
-    # Use the ViltProcessor to handle the image
-    encoding = processor(images=image, return_tensors="pt")
-    return encoding['pixel_values']
+    # Placeholder function - actual image preprocessing required
+    return image
 
 def preprocess_question(question: str):
-    """Preprocess the question for the model."""
-    # Use the ViltProcessor to handle the question
-    encoding = processor(text=question, return_tensors="pt")
-    return encoding['input_ids']
+    """Tokenize the question."""
+    return tokenizer(question, return_tensors="pt")
 
 def get_vqa_answer(image, question):
-    """Get the answer from the model."""
-    # Preprocess the image and question
+    """Get the answer from VisualBERT."""
     image_tensor = preprocess_image(image)
     question_ids = preprocess_question(question)
-
-    # Prepare inputs for the model
+    
+    # Prepare inputs
     inputs = {
-        'pixel_values': image_tensor,
-        'input_ids': question_ids
+        'input_ids': question_ids['input_ids'],
+        'visual_feats': image_tensor
     }
-
-    # Perform inference
+    
     with torch.no_grad():
         outputs = model(**inputs)
-        logits = outputs.logits
-
-    # Get the predicted answer
-    predicted_ids = logits.argmax(-1).item()
-    answer = processor.convert_ids_to_tokens(predicted_ids)
+        answer = tokenizer.decode(outputs.logits.argmax(-1))
+    
     return answer
 
 def main():
