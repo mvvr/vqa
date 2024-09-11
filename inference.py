@@ -13,10 +13,13 @@ model.eval()
 def get_vqa_answer(image, question):
     # Preprocess the image and question
     image_tensor = preprocess_image(image)
-    question_tensor = preprocess_question(question)
+    question_ids = preprocess_question(question)
 
-    # Process inputs
-    inputs = processor(images=image_tensor, text=question, return_tensors="pt", padding=True)
+    # Prepare inputs for the model
+    inputs = {
+        'pixel_values': image_tensor,
+        'input_ids': question_ids
+    }
 
     # Perform inference
     with torch.no_grad():
