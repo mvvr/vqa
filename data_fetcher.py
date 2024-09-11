@@ -11,4 +11,10 @@ def preprocess_image(image: Image.Image):
     return transform(image).unsqueeze(0)  # Add batch dimension
 
 def preprocess_question(question: str, tokenizer, max_length=20):
-    return tokenizer(question, return_tensors="pt", truncation=True, padding="max_length", max_length=max_length)
+    return tokenizer.encode_plus(
+        question,
+        return_tensors="pt",
+        truncation=True,
+        padding="max_length",
+        max_length=max_length
+    )
