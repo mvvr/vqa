@@ -13,7 +13,7 @@ model.eval()
 def get_vqa_answer(image, question):
     # Preprocess the image and question
     image_tensor = preprocess_image(image)
-    question_tensor = preprocess_question(question, processor)
+    question_tensor = preprocess_question(question)
 
     # Process inputs
     inputs = processor(images=image_tensor, text=question, return_tensors="pt", padding=True)
@@ -24,5 +24,6 @@ def get_vqa_answer(image, question):
         logits = outputs.logits
 
     # Get the predicted answer
-    answer = processor.convert_ids_to_tokens(logits.argmax(-1).item())
+    predicted_ids = logits.argmax(-1).item()
+    answer = processor.convert_ids_to_tokens(predicted_ids)
     return answer
