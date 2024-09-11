@@ -1,24 +1,28 @@
-from transformers import ViltForQuestionAnswering, ViltProcessor
-#from PIL import Image
 import torch
+from transformers import ViltForQuestionAnswering, ViltProcessor
 from data_fetcher import preprocess_image, preprocess_question
-# Load pre-trained model and tokenizer
-# Load a pre-trained VQA model and tokenizer
-model_name = 'dandelin/vilt-b32-finetuned-vqa'  # Use a specific pre-trained VQA model
+
+# Load pre-trained VQA model and processor
+model_name = 'dandelin/vilt-b32-finetuned-vqa'
 model = ViltForQuestionAnswering.from_pretrained(model_name)
-tokenizer = ViltProcessor.from_pretrained(model_name)
+processor = ViltProcessor.from_pretrained(model_name)
 
-
-#tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+# Set the model to evaluation mode
+model.eval()
 
 def get_vqa_answer(image, question):
+    # Preprocess the image and question
     image_tensor = preprocess_image(image)
-    question_tensor = preprocess_question(question, tokenizer)
+    question_tensor = preprocess_question(question, processor)
 
+    # Process inputs
+    inputs = processor(images=image_tensor, text=question, return_tensors="pt", padding=True)
+
+    # Perform inference
     with torch.no_grad():
-        output = model(image_tensor, question_tensor)
+        outputs = model(**inputs)
+        logits = outputs.logits
 
     # Get the predicted answer
-    _, predicted_idx = torch.max(output, dim=1)
-    answer = answer_vocab[predicted_idx.item()]  # Use a predefined answer vocabulary
+    answer = processor.convert_ids_to_tokens(logits.argmax(-1).item())
     return answer
