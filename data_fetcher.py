@@ -1,20 +1,14 @@
-import torchvision.transforms as transforms
-from transformers import BertTokenizer
+from transformers import ViltProcessor
 from PIL import Image
+import torch
+
+# Initialize processor globally
+processor = ViltProcessor.from_pretrained('dandelin/vilt-b32-finetuned-vqa')
 
 def preprocess_image(image: Image.Image):
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-    return transform(image).unsqueeze(0)  # Add batch dimension
+    # Convert image to required format and size
+    return processor(images=image, return_tensors="pt").pixel_values
 
-def preprocess_question(question: str, tokenizer, max_length=20):
-    return tokenizer.encode_plus(
-        question,
-        return_tensors="pt",
-        truncation=True,
-        padding="max_length",
-        max_length=max_length
-    )
+def preprocess_question(question: str):
+    # Tokenize and preprocess the question
+    return processor(text=question, return_tensors="pt")
