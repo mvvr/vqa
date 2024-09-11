@@ -1,6 +1,6 @@
 import torch
 from PIL import Image
-from transformers import VisualBertForQuestionAnswering, VisualBertTokenizer
+from transformers import BlipProcessor, BlipForConditionalGeneration
 import streamlit as st
 
 # Load pre-trained VQA model and tokenizer
@@ -8,33 +8,33 @@ model_name = 'uclanlp/visualbert-vqa-coco'
 model = VisualBertForQuestionAnswering.from_pretrained(model_name)
 tokenizer = VisualBertTokenizer.from_pretrained(model_name)
 
-# Set the model to evaluation mode
-model.eval()
+model_name = 'Salesforce/blip-vqa-base'
+model = BlipForConditionalGeneration.from_pretrained(model_name)
+processor = BlipProcessor.from_pretrained(model_name)
 
 def preprocess_image(image: Image.Image):
-    """Convert image to tensor."""
+    """Preprocess the image for BLIP."""
     image = image.convert("RGB")
-    # Placeholder function - actual image preprocessing required
-    return image
+    return processor(images=image, return_tensors="pt")
 
 def preprocess_question(question: str):
-    """Tokenize the question."""
-    return tokenizer(question, return_tensors="pt")
+    """Preprocess the question for BLIP."""
+    return processor(text=question, return_tensors="pt")
 
 def get_vqa_answer(image, question):
-    """Get the answer from VisualBERT."""
+    """Get the answer from BLIP."""
     image_tensor = preprocess_image(image)
     question_ids = preprocess_question(question)
     
     # Prepare inputs
     inputs = {
-        'input_ids': question_ids['input_ids'],
-        'visual_feats': image_tensor
+        'pixel_values': image_tensor['pixel_values'],
+        'input_ids': question_ids['input_ids']
     }
     
     with torch.no_grad():
         outputs = model(**inputs)
-        answer = tokenizer.decode(outputs.logits.argmax(-1))
+        answer = processor.decode(outputs.logits.argmax(-1))
     
     return answer
 
