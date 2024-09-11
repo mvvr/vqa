@@ -13,13 +13,15 @@ model.eval()
 
 def preprocess_image(image: Image.Image):
     """Preprocess the image for the model."""
-    # Convert image to the format required by ViltProcessor
+    # Convert image to RGB
     image = image.convert("RGB")
-    return processor(images=image, return_tensors="pt")
+    # Use processor to get pixel values
+    return processor(images=image, return_tensors="pt").pixel_values
 
 def preprocess_question(question: str):
     """Preprocess the question for the model."""
-    return processor(text=question, return_tensors="pt")
+    # Use processor to get input IDs
+    return processor(text=question, return_tensors="pt").input_ids
 
 def get_vqa_answer(image, question):
     """Get the answer from the model."""
@@ -29,8 +31,8 @@ def get_vqa_answer(image, question):
 
     # Prepare inputs for the model
     inputs = {
-        'pixel_values': image_tensor['pixel_values'],
-        'input_ids': question_ids['input_ids']
+        'pixel_values': image_tensor,
+        'input_ids': question_ids
     }
 
     # Perform inference
@@ -50,7 +52,7 @@ def main():
     uploaded_image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
     
     if uploaded_image:
-        image = Image.open(uploaded_image).convert("RGB")
+        image = Image.open(uploaded_image)
         st.image(image, caption="Uploaded Image", use_column_width=True)
     
     # Input question
