@@ -13,14 +13,17 @@ model.eval()
 
 def preprocess_image(image: Image.Image):
     """Preprocess the image for the model."""
-    # Convert image to RGB
+    # Convert image to RGB and prepare for the model
     image = image.convert("RGB")
-    # Use ViltProcessor to handle the image
-    return processor(images=image, return_tensors="pt")['pixel_values']
+    # Use the ViltProcessor to handle the image
+    encoding = processor(images=image, return_tensors="pt")
+    return encoding['pixel_values']
 
 def preprocess_question(question: str):
     """Preprocess the question for the model."""
-    return processor(text=question, return_tensors="pt")['input_ids']
+    # Use the ViltProcessor to handle the question
+    encoding = processor(text=question, return_tensors="pt")
+    return encoding['input_ids']
 
 def get_vqa_answer(image, question):
     """Get the answer from the model."""
@@ -39,9 +42,9 @@ def get_vqa_answer(image, question):
         outputs = model(**inputs)
         logits = outputs.logits
 
-    # Decode the answer
-    answer_ids = logits.argmax(-1).tolist()
-    answer = processor.convert_ids_to_tokens(answer_ids[0])
+    # Get the predicted answer
+    predicted_ids = logits.argmax(-1).item()
+    answer = processor.convert_ids_to_tokens(predicted_ids)
     return answer
 
 def main():
