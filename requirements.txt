@@ -4,4 +4,4 @@ transformers
 streamlit
 Pillow
 altair
-PIL
+
