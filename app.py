@@ -39,9 +39,9 @@ def get_vqa_answer(image, question):
         outputs = model(**inputs)
         logits = outputs.logits
 
-    # Get the predicted answer
-    predicted_ids = logits.argmax(-1).item()
-    answer = processor.convert_ids_to_tokens(predicted_ids)
+    # Decode the answer
+    answer_ids = logits.argmax(-1).tolist()
+    answer = processor.convert_ids_to_tokens(answer_ids[0])
     return answer
 
 def main():
