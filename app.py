@@ -1,49 +1,42 @@
-import torch
+from transformers import BlipProcessor, BlipForConditionalGeneration
 from PIL import Image
-from transformers import OscarForQuestionAnswering, OscarTokenizer
+import torch
 import streamlit as st
 
-# Load pre-trained OSCAR model and tokenizer
-model_name = 'microsoft/oscar-base-vqav2'
-model = OscarForQuestionAnswering.from_pretrained(model_name)
-tokenizer = OscarTokenizer.from_pretrained(model_name)
-
-# Set the model to evaluation mode
-model.eval()
+# Load pre-trained BLIP model and processor
+model_name = 'Salesforce/blip-vqa-base'
+model = BlipForConditionalGeneration.from_pretrained(model_name)
+processor = BlipProcessor.from_pretrained(model_name)
 
 def preprocess_image(image: Image.Image):
-    """Preprocess the image for OSCAR."""
-    # For OSCAR, you typically need a feature extractor or pre-trained visual encoder
-    # Assuming we have some `extract_features` function or you can use pre-trained feature extractors
-    # For now, we'll return a dummy tensor for demonstration
+    """Preprocess the image for BLIP."""
     image = image.convert("RGB")
-    # Placeholder: Implement actual feature extraction
-    return torch.rand(1, 3, 224, 224)  # Example shape, adjust as needed
+    return processor(images=image, return_tensors="pt")
 
 def preprocess_question(question: str):
-    """Tokenize the question for OSCAR."""
-    return tokenizer(question, return_tensors="pt")
+    """Preprocess the question for BLIP."""
+    return processor(text=question, return_tensors="pt")
 
 def get_vqa_answer(image, question):
-    """Get the answer from OSCAR."""
+    """Get the answer from BLIP."""
     image_tensor = preprocess_image(image)
     question_ids = preprocess_question(question)
     
     # Prepare inputs
     inputs = {
-        'input_ids': question_ids['input_ids'],
-        'visual_feats': image_tensor
+        'pixel_values': image_tensor['pixel_values'],
+        'input_ids': question_ids['input_ids']
     }
     
     with torch.no_grad():
-        outputs = model(input_ids=inputs['input_ids'], visual_feats=inputs['visual_feats'])
+        outputs = model(**inputs)
         answer_ids = torch.argmax(outputs.logits, dim=-1)
-        answer = tokenizer.decode(answer_ids[0], skip_special_tokens=True)
+        answer = processor.decode(answer_ids[0], skip_special_tokens=True)
     
     return answer
 
 def main():
-    st.title('Visual Question Answering (VQA) with OSCAR Model')
+    st.title('Visual Question Answering (VQA) with BLIP Model')
     
     # Upload image
     uploaded_image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
