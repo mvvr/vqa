@@ -13,6 +13,7 @@ model.eval()
 
 def preprocess_image(image: Image.Image):
     """Preprocess the image for the model."""
+    # Convert PIL Image to the format required by the model
     return processor(images=image, return_tensors="pt").pixel_values
 
 def preprocess_question(question: str):
